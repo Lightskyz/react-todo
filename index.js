@@ -1,9 +1,16 @@
 //This is a stateless component or pure component (just render something)
-function TodoList(todos){
-   console.log(todos);
+function TodoList({todos, onSetTodoStatus}){
    return(
       <ul>
-         <li>TODO LIST</li>
+         {todos.map(todo=>
+            <li key={todo.id}>
+               <label>
+                  <input type="checkbox" checked={todo.isCompleted} onChange={e => onSetTodoStatus(todo, e.target.checked)} />
+                  {todo.isCompleted
+                     ? <del>{todo.text}</del>
+                     : todo.text}
+               </label>
+            </li>)}
       </ul>
    );
 }
@@ -25,6 +32,7 @@ class AppComponent extends React.Component{
       };
 
       this._onShowCompletedChanged = this._onShowCompletedChanged.bind(this);
+      this._setTodoStatus = this._setTodoStatus.bind(this);
    }
 
    render() {
@@ -40,9 +48,20 @@ class AppComponent extends React.Component{
                Show Completed
                <input type="checkbox" checked={filter.showCompleted} onChange={this._onShowCompletedChanged} />
             </label>
-            <TodoList todos={filteredTodos} />
+            <TodoList todos={filteredTodos} onSetTodoStatus={this._setTodoStatus} />
          </div>
       );
+   }
+
+   _setTodoStatus(todo, isCompleted){
+      const {todos} = this.state;
+      const newTodos = todos.map(oldTodo => {
+         if (oldTodo.id !== todo.id)
+            return oldTodo;
+
+         return Object.assign({}, oldTodo, {isCompleted});
+      });
+      this.setState ({ todos:newTodos });
    }
 
    _onShowCompletedChanged(e) {
